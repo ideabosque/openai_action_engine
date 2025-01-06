@@ -61,6 +61,9 @@ class OpenaiActionEngine(object):
 
     def openai_action_dispatch(self, **kwargs: Dict[str, Any]) -> Any:
         path = kwargs.pop("path")
+        if path is None:
+            raise Exception("path is required!!")
+        self.logger.info(f"path = {path}")
 
         kwargs = dict(
             {k: v for k, v in self.setting.items() if k not in SYSTEM_CONSTANTS},

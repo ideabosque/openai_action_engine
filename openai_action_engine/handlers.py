@@ -19,6 +19,8 @@ from silvaengine_utility import Utility
 
 title = None
 version = None
+servers = None
+base_path = None
 configuration = None
 functions = None
 aws_s3 = None
@@ -29,7 +31,7 @@ funct_extract_path = None
 
 
 def handlers_init(logger: logging.Logger, **setting: Dict[str, Any]) -> None:
-    global title, version, configuration, functions
+    global title, version, servers, base_path, configuration, functions
     global aws_s3
     global funct_bucket_name, funct_zip_path, funct_extract_path
     try:
@@ -42,9 +44,11 @@ def handlers_init(logger: logging.Logger, **setting: Dict[str, Any]) -> None:
 
 
 def _set_parameters(setting: Dict[str, Any]) -> None:
-    global title, version, configuration, functions
+    global title, version, servers, base_path, configuration, functions
     title = setting["title"]
     version = setting["version"]
+    servers = setting["servers"]
+    base_path = setting["base_path"]
     configuration = setting["configuration"]
     functions = setting["functions"]
 
@@ -83,6 +87,12 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
                 "title": title,
                 "version": version,
             },
+            "servers": [
+                {
+                    "url": server,
+                }
+                for server in servers
+            ],
             "paths": {},
         }
 
@@ -131,7 +141,7 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
 
         # Add functions to the Swagger paths
         for function in functions:
-            path = function["path"]
+            path = base_path + function["path"]
             method = function["method"].lower()
             summary = function.get("summary", "No summary provided")
             function_name = function.get("function_name", "unknownFunction")

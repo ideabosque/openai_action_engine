@@ -83,4 +83,8 @@ class OpenaiActionEngine(object):
                 self.logger.exception(f"{function_name} is not supported!!")
                 raise Exception(f"{function_name} is not supported")
 
-            return action_function(**kwargs)
+            return (
+                Utility.json_dumps(action_function(**kwargs))
+                if isinstance(action_function(**kwargs), (dict, list))
+                else action_function(**kwargs)
+            )

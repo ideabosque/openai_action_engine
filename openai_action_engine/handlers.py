@@ -82,7 +82,7 @@ def _setup_function_paths(setting: Dict[str, Any]) -> None:
 def generate_swagger_yaml(logger: logging.Logger) -> str:
     try:
         swagger = {
-            "openapi": "3.0.0",
+            "openapi": "3.1.0",
             "info": {
                 "title": title,
                 "version": version,

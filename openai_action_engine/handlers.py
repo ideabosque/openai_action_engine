@@ -87,12 +87,7 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
                 "title": title,
                 "version": version,
             },
-            "servers": [
-                {
-                    "url": server,
-                }
-                for server in servers
-            ],
+            "servers": [{"url": server} for server in servers],
             "paths": {},
         }
 
@@ -114,7 +109,6 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
             for prop in properties:
                 prop_type = type_mapping.get(prop["type"], "string")
                 if prop_type == "array" and "child_type" in prop:
-                    # Handle nested list
                     child_type = type_mapping.get(prop["child_type"], "string")
                     nested_properties = {}
                     if child_type == "object" and "properties" in prop:
@@ -129,17 +123,14 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
                         },
                     }
                 elif prop_type == "object" and "properties" in prop:
-                    # Handle nested dict
                     result[prop["name"]] = {
                         "type": "object",
                         "properties": handle_properties(prop["properties"]),
                     }
                 else:
-                    # Handle primitive types
                     result[prop["name"]] = {"type": prop_type}
             return result
 
-        # Add functions to the Swagger paths
         for function in functions:
             path = base_path + function["path"]
             method = function["method"].lower()
@@ -149,10 +140,8 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
             request_body = None
             response = {}
 
-            # Handle parameters
             for param in function["parameters"]:
                 if method in ["post", "put", "patch"] and param["in"] == "body":
-                    # Add to requestBody
                     if request_body is None:
                         request_body = {
                             "required": True,
@@ -162,11 +151,19 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
                                 }
                             },
                         }
-                    request_body["content"]["application/json"]["schema"]["properties"][
-                        param["name"]
-                    ] = {
-                        "type": type_mapping.get(param["type"], "string"),
-                    }
+                    if "properties" in param:
+                        request_body["content"]["application/json"]["schema"][
+                            "properties"
+                        ][param["name"]] = {
+                            "type": "object",
+                            "properties": handle_properties(param["properties"]),
+                        }
+                    else:
+                        request_body["content"]["application/json"]["schema"][
+                            "properties"
+                        ][param["name"]] = {
+                            "type": type_mapping.get(param["type"], "string"),
+                        }
                 else:
                     param_schema = {"type": type_mapping.get(param["type"], "string")}
                     parameters.append(
@@ -178,10 +175,8 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
                         }
                     )
 
-            # Handle response
             response_config = function["response"]
             if response_config["type"] == "list":
-                # Array response
                 child_type = type_mapping.get(response_config["child_type"], "string")
                 item_properties = {}
                 if child_type == "object" and "properties" in response_config:
@@ -205,7 +200,6 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
                     },
                 }
             elif response_config["type"] == "dict":
-                # Object response
                 properties = handle_properties(response_config["properties"])
                 response = {
                     "description": "Success",
@@ -219,7 +213,6 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
                     },
                 }
 
-            # Build the path
             if path not in swagger["paths"]:
                 swagger["paths"][path] = {}
 
@@ -227,10 +220,9 @@ def generate_swagger_yaml(logger: logging.Logger) -> str:
                 "summary": summary,
                 "operationId": function_name,
                 "parameters": parameters,
-                "response": response,
+                "responses": {"200": response},
             }
 
-            # Include requestBody for POST/PUT/PATCH
             if request_body:
                 path_data["requestBody"] = request_body
 

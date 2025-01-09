@@ -10,7 +10,7 @@ from typing import Optional
 
 from botocore.exceptions import ClientError
 
-from .config_handler import Config  # Import Config class
+from .config import Config  # Import Config class
 
 
 def download_module(logger: logging.Logger, module_name: str) -> Optional[str]:

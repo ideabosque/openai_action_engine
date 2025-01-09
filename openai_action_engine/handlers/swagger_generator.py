@@ -8,7 +8,7 @@ from typing import Any, Dict
 
 import yaml
 
-from .config_handler import Config  # Import Config class
+from .config import Config  # Import Config class
 
 # Mapping from data types to OpenAPI schema types
 TYPE_MAPPING = {

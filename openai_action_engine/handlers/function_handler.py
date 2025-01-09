@@ -13,8 +13,8 @@ from typing import Callable, Dict, Optional, Tuple
 
 from silvaengine_utility import Utility  # Reuse existing utility functions
 
-from .aws_handler import download_and_extract_module, module_exists
-from .config_handler import Config  # Import Config class
+from .config import Config  # Import Config class
+from .s3_client import download_and_extract_module, module_exists
 
 
 def load_action_function(

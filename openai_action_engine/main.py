@@ -9,12 +9,12 @@ from typing import Any, Dict, List, Tuple
 
 from silvaengine_utility import Utility
 
-from .handlers.config_handler import SYSTEM_CONSTANTS, Config
+from .handlers.config import SYSTEM_CONSTANTS, Config
 from .handlers.function_handler import (
     execute_function,
     get_function_name_and_path_parameters,
 )
-from .handlers.swagger_handler import generate_swagger_yaml
+from .handlers.swagger_generator import generate_swagger_yaml
 
 SYSTEM_CONSTANTS = [
     "region_name",

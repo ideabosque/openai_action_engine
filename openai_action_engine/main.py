@@ -9,12 +9,12 @@ from typing import Any, Dict, List, Tuple
 
 from silvaengine_utility import Utility
 
-from .handlers import (
-    generate_swagger_yaml,
-    get_action_function,
+from .handlers.config_handler import SYSTEM_CONSTANTS, Config
+from .handlers.function_handler import (
+    execute_function,
     get_function_name_and_path_parameters,
-    handlers_init,
 )
+from .handlers.swagger_handler import generate_swagger_yaml
 
 SYSTEM_CONSTANTS = [
     "region_name",
@@ -54,7 +54,14 @@ def deploy() -> List:
 
 class OpenaiActionEngine(object):
     def __init__(self, logger: logging.Logger, **setting: Dict[str, Any]) -> None:
-        handlers_init(logger, **setting)
+        """
+        Initializes the OpenAI Action Engine.
+        Args:
+            logger (logging.Logger): Logger instance for logging.
+            **settings (Dict[str, Any]): Configuration dictionary.
+        """
+        # Initialize configuration via the Config class
+        Config.initialize(logger, **setting)
 
         self.logger = logger
         self.setting = setting
@@ -78,13 +85,4 @@ class OpenaiActionEngine(object):
             )
             kwargs = dict(kwargs, **path_parameters)
 
-            action_function = get_action_function(self.logger, function_name)
-            if action_function is None:
-                self.logger.exception(f"{function_name} is not supported!!")
-                raise Exception(f"{function_name} is not supported")
-
-            return (
-                Utility.json_dumps(action_function(**kwargs))
-                if isinstance(action_function(**kwargs), (dict, list))
-                else action_function(**kwargs)
-            )
+            return execute_function(self.logger, function_name, **kwargs)

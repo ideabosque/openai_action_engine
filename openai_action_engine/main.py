@@ -16,19 +16,6 @@ from .handlers.function_handler import (
 )
 from .handlers.swagger_generator import generate_swagger_yaml
 
-SYSTEM_CONSTANTS = [
-    "region_name",
-    "aws_access_key_id",
-    "aws_secret_access_key",
-    "title",
-    "version",
-    "configuration",
-    "functions",
-    "funct_bucket_name",
-    "funct_zip_path",
-    "funct_extract_path",
-]
-
 
 # Hook function applied to deployment
 def deploy() -> List:
